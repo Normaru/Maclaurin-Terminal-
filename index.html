@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal Calculadora</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #000000;
+            color: #cccccc;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+  
+        #btn-info {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            background: transparent;
+            border: 1px solid #555555;
+            color: #cccccc;
+            font-family: 'Courier New', Courier, monospace;
+            width: 35px;
+            height: 35px;
+            border-radius: 20%;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease;
+            z-index: 999;
+        }
+        #btn-info:hover {
+            background-color: #ffffff;
+            color: #0c0c0c;
+            border-color: #ffffff;
+        }
+
+ 
+        #modal-info {
+            display: none; 
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-conteudo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 90%;
+            max-height: 90%;
+        }
+        .btn-fechar {
+            background: transparent;
+            border: none;
+            color: #ff5555;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+  
+        .modal-conteudo img {
+            max-width: 100%;
+            max-height: 75vh;
+          
+            object-fit: contain;
+        }
+
+        #terminal-container {
+            width: 90%;
+            max-width: 600px;
+            text-align: center; 
+        }
+        #terminal {
+            white-space: pre-wrap; 
+            line-height: 1.5;
+            font-size: 18px;
+        }
+        .input-linha {
+            display: flex;
+            justify-content: center; 
+            align-items: center;
+            margin-top: 15px;
+        }
+        .prompt-text {
+            color: #ffffff;
+            font-size: 18px;
+        }
+        input {
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 18px;
+            outline: none;
+            padding: 0;
+            margin-left: 8px;
+            width: 80px; 
+            text-align: left;
+        }
+        .info-reboot {
+            color: #555555;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <button id="btn-info">i</button>
+
+    <div id="modal-info">
+        <div class="modal-conteudo">
+            <button class="btn-fechar" id="btn-fechar">Fechar</button>
+            <img src="maclaurin.png" alt="Explicação da Série de Maclaurin">
+        </div>
+    </div>
+
+    <div id="terminal-container">
+        <div id="terminal"></div>
+        <div class="input-linha" id="container-input">
+            <span id="prompt-label" class="prompt-text">Digite aqui:</span>
+            <input type="text" id="terminal-input" autofocus autocomplete="off">
+        </div>
+    </div>
+    <script>
+        const terminal = document.getElementById('terminal');
+        const inputField = document.getElementById('terminal-input');
+        const promptLabel = document.getElementById('prompt-label');
+        const containerInput = document.getElementById('container-input');
+        
+        const btnInfo = document.getElementById('btn-info');
+        const btnFechar = document.getElementById('btn-fechar');
+        const modalInfo = document.getElementById('modal-info');
+
+        let passo = 'menu'; 
+
+        let e = 1;
+        let exp;
+        let pi = 3.141592653589793; 
+        let graus;
+        let c;
+
+        function fatorial(num){ 
+            let fat = 1; 
+            for (let i = num; i >= 1; i--){ 
+                fat *= i;
+            } 
+            return fat; 
+        }
+       
+        function print(texto) {
+            terminal.textContent += texto;
+        }
+
+        function mostrarMenu() {
+            terminal.textContent = ""; 
+            print("Digite o que deseja calcular!!\n\n");
+            print("1 - e^x\n");
+            print("2 - sin(x)\n");
+            print("3 - cos(x)\n\n");
+            promptLabel.textContent = "Digite aqui:";
+            inputField.value = "";
+            passo = 'menu';
+        }
+        
+        function encerrarPrograma() {
+            containerInput.style.display = 'none'; 
+            print("\n\nREINICIE A PÁGINA :)");
+            
+            const rebootDiv = document.createElement('div');
+            rebootDiv.className = 'info-reboot';
+            rebootDiv.textContent = "Legal né?";
+            document.getElementById('terminal-container').appendChild(rebootDiv);
+        }
+        
+        inputField.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                let valor = inputField.value;
+                inputField.value = "";
+
+                if (passo === 'menu') {
+                    c = parseInt(valor);
+                    
+                    if (c === 3) {
+                        terminal.textContent = ""; 
+                        print("Digite os graus:\n");
+                        promptLabel.textContent = "> ";
+                        passo = 'cos_graus';
+                    } 
+                    else if (c === 2) {
+                        terminal.textContent = "";
+                        print("Digite os graus:\n");
+                        promptLabel.textContent = "> ";
+                        passo = 'sin_graus';
+                    } 
+                    else if (c === 1) {
+                        terminal.textContent = "";
+                        print("Digite o expoente x que será elevado a euler:\n");
+                        promptLabel.textContent = "> ";
+                        passo = 'e_exp';
+                    } 
+                    else {
+                        terminal.textContent = "";
+                        print("Inválido!!!\n");
+                        encerrarPrograma();
+                    }
+                } 
+                else if (passo === 'cos_graus') {
+                    graus = parseFloat(valor);
+                    terminal.textContent = ""; 
+                    
+                    let x = graus*(pi/180.0);
+                    let cosx = 1; 
+                    let potencia = x*x; 
+                    let sinal = -1; 
+
+                    for (let i = 2; i <= 30; i += 2){ 
+                        cosx += sinal*(potencia/fatorial(i));
+                        potencia *= (x*x); 
+                        sinal *= -1; 
+                    }
+
+                    print("Resultado cos(x):\n" + cosx.toFixed(6)); 
+                    encerrarPrograma();
+                } 
+                else if (passo === 'sin_graus') {
+                    graus = parseFloat(valor);
+                    terminal.textContent = "";
+
+                    let x = graus*(pi/180.0);
+                    let sinx = 0; 
+                    let potencia = x; 
+                    let sinal = 1; 
+
+                    for (let i = 1; i <= 30; i += 2){ 
+                        sinx += sinal*(potencia/fatorial(i)); 
+                        potencia *= (x*x);
+                        sinal *= -1; 
+                    }
+
+                    print("Resultado sin(x):\n" + sinx.toFixed(6));
+                    encerrarPrograma();
+                } 
+                else if (passo === 'e_exp') {
+                    exp = parseInt(valor);
+                    terminal.textContent = "";
+
+                    e = 1; 
+                    let potencia = 1; 
+
+                    for (let i = 1; i <= 50; i++){ 
+                        potencia *= exp; 
+                        e += potencia/fatorial(i);
+                    }
+
+                    print("Resultado e^x:\n" + e.toFixed(6));
+                    encerrarPrograma();
+                }
+            }
+        });
+
+        btnInfo.addEventListener('click', () => {
+            modalInfo.style.display = 'flex';
+        });
+
+        btnFechar.addEventListener('click', () => {
+            modalInfo.style.display = 'none';
+            if (containerInput.style.display !== 'none') {
+                inputField.focus();
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (containerInput.style.display !== 'none' && modalInfo.style.display !== 'flex' && e.target !== btnInfo) {
+                inputField.focus();
+            }
+        });
+
+        mostrarMenu();
+    </script>
+</body>
+</html>
+
